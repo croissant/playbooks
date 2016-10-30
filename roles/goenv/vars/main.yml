@@ -1,0 +1,5 @@
+---
+# vars file for rbenv
+target: /usr/local/goenv
+goenv_path: /usr/local/goenv/bin/goenv
+go_ver: 1.7.3

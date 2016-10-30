@@ -1,0 +1,34 @@
+---
+- stat: path={{ target }}
+  register: goenv
+
+- stat: path={{ target }}/versions/{{ go_ver }}
+  register: go_install_dir
+
+- name: set ignore ssl
+  shell: git config --global http.sslVerify false
+
+- name: clone goenv
+  git:
+    repo: https://github.com/wfarr/goenv.git
+    dest: "{{ target }}"
+  when: not goenv.stat.exists
+
+- name: add goenv.sh
+  copy: src=files/goenv.sh dest=/etc/profile.d/goenv.sh
+
+- name: install go
+  shell: . /etc/profile ; goenv install {{ go_ver }}
+  when: not go_install_dir.stat.exists
+
+- name: set go version
+  shell: . /etc/profile ; goenv global {{ go_ver }}
+  when: not go_install_dir.stat.exists
+
+- name: change permission
+  file:
+    path={{ target }}
+    state=directory
+    owner={{ ansible_env.SUDO_USER }}
+    group={{ ansible_env.SUDO_USER }}
+    recurse=yes
