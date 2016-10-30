@@ -158,7 +158,7 @@
 ;(helm-mode 1)
 
 (global-set-key (kbd "M-x") 'helm-M-x)
-;(global-set-key (kbd "C-x C-r") 'helm-recentf)
+(global-set-key (kbd "C-x C-r") 'helm-recentf)
 
 (require 'cl)
 (defun close-all-buffers ()
@@ -212,6 +212,9 @@
             (set-face-underline-p 'erb-face t)
             (set-face-background 'erb-exec-face "brightblack")
             (set-face-underline-p 'erb-exec-face t)))
+
+;; company
+(global-company-mode)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
