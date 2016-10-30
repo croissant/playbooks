@@ -1,0 +1,4 @@
+- name: Get ansible_user home directory
+  shell: 'getent passwd `whoami` | cut -d: -f6'
+  register: ansible_home
+  become: no

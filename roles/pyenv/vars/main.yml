@@ -1,0 +1,5 @@
+---
+# vars file for pyenv
+target: /usr/local/pyenv
+pyenv_path: /usr/local/pyenv/bin/pyenv
+python_ver: 3.5.2

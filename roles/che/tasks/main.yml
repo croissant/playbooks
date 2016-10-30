@@ -1,0 +1,37 @@
+---
+# tasks file for che
+- stat: path={{ maven_path }}
+  register: maven
+
+- stat: path=/usr/local/bin/mvn
+  register: maven_link
+
+- stat: path={{ che_path }}
+  register: che
+
+- stat: path=/usr/src/che
+  register: che_work
+
+- name: download maven
+  get_url: url={{ maven_url }} dest=/usr/src checksum={{ maven_checksum }}
+  when: not maven.stat.exists
+
+- name: install maven
+  shell: tar xzf /usr/src/{{ maven_url|basename }} -C /usr/local/
+  when: not maven.stat.exists
+  
+- name: create symlink for maven
+  shell: ln -s {{ maven_path }}/bin/mvn /usr/local/bin/mvn
+  when: not maven_link.stat.exists
+
+- name: checkout che
+  git: repo={{ che_repo }} dest=/usr/src/che
+  when: not che_work.stat.exists
+
+- name: build che
+  shell: mvn clean install chdir=/usr/src/che/assembly
+  when: not che.stat.exists
+
+- name: install che
+  shell: mv assembly-main/target/eclipse-che-*/eclipse-che-* {{ che_path }} chdir=/usr/src/che/assembly
+  when: not che.stat.exists

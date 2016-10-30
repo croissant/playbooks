@@ -1,0 +1,39 @@
+---
+- stat: path={{ target }}
+  register: rbenv
+
+- name: set ignore ssl
+  shell: git config --global http.sslVerify false
+
+- name: clone rbenv
+  git:
+    repo=https://github.com/sstephenson/rbenv.git
+    dest={{ target }}
+  when: not rbenv.stat.exists
+
+- stat: path={{ target }}/plugins/ruby-build
+  register: ruby_build
+
+- name: clone ruby-build
+  git:
+    repo=https://github.com/sstephenson/ruby-build.git
+    dest={{ target }}/plugins/ruby-build
+  when: not ruby_build.stat.exists
+
+- name: add rbenv.sh
+  copy: src=files/rbenv.sh dest=/etc/profile.d/rbenv.sh
+
+- name: install ruby
+  shell: . /etc/profile ; rbenv install -s {{ ruby_ver }}
+
+- name: set ruby version
+  shell: . /etc/profile ; rbenv global {{ ruby_ver }}
+
+- name: change permission
+  file:
+    path={{ target }}
+    state=directory
+    owner={{ ansible_env.SUDO_USER }}
+    group={{ ansible_env.SUDO_USER }}
+    recurse=yes
+    

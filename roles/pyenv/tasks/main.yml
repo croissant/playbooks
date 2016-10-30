@@ -1,0 +1,27 @@
+---
+- stat: path={{ target }}
+  register: pyenv
+
+- name: set ignore ssl
+  shell: git config --global http.sslVerify false
+
+- name: clone pyenv
+  git:
+    repo=https://github.com/yyuu/pyenv.git
+    dest={{ target }}
+  when: not pyenv.stat.exists
+
+- name: add pyenv.sh
+  copy: src=files/pyenv.sh dest=/etc/profile.d/pyenv.sh
+
+- name: install python
+  shell: . /etc/profile ; pyenv install -s {{ python_ver }}
+
+- name: change permission
+  file:
+    path={{ target }}
+    state=directory
+    owner={{ ansible_env.SUDO_USER }}
+    group={{ ansible_env.SUDO_USER }}
+    recurse=yes
+    

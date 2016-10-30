@@ -1,0 +1,16 @@
+---
+
+- name: install epel
+  yum: name="epel-release" state=latest
+- name: install devtools
+  yum: name="@Development tools" state=present
+
+- name: locale settings
+  shell: localedef -f UTF-8 -i ja_JP ja_JP.utf8
+
+- name: localtime setting
+  command: cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+- name: install packages
+  yum: name={{ item }} state=present
+  with_items: install_packages

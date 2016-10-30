@@ -1,0 +1,46 @@
+---
+# tasks file for activator
+- name: install jdk
+  command: aptitude -y install openjdk-8-jdk unzip
+
+- stat: path={{ activator_profile }}
+  register: activator_profile_path
+
+- stat: path={{ activator_path }}
+  register: activator_link
+
+- stat: path=/usr/local/src/typesafe-activator-{{ activator_version }}.zip
+  register: activator_archive
+
+- stat: path=/usr/local/activator-dist-{{ activator_version }}
+  register: activator_real_dir
+
+- name: get activator from web
+  get_url:
+    url=http://downloads.lightbend.com/typesafe-activator/{{ activator_version }}/typesafe-activator-{{ activator_version }}.zip
+    dest=/usr/local/src
+  when: not activator_archive.stat.exists
+
+- name: install typesafe-activator
+  unarchive:
+    copy=no src=/usr/local/src/typesafe-activator-{{ activator_version }}.zip
+    dest={{ activator_path | dirname }}
+  when: not activator_real_dir.stat.exists
+
+- name: create symlink
+  file:
+    src={{ activator_path | dirname }}/activator-dist-{{ activator_version }}
+    dest={{ activator_path }}
+    state=link
+  when: not activator_link.stat.exists
+
+- name: change permission
+  file:
+    path={{ activator_path }}-dist-{{ activator_version }}
+    owner={{ ansible_ssh_user }}
+    group={{ ansible_ssh_user }}
+    recurse=yes
+
+- name: add PATH
+  shell: echo 'export PATH="$PATH:{{ activator_path }}/bin"' >> {{ activator_profile }}
+  when: not activator_profile_path.stat.exists

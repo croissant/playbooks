@@ -1,0 +1,5 @@
+---
+# vars file for phpenv
+target: /usr/local/phpenv
+phpenv_path: /usr/local/phpenv/bin/phpenv
+php_ver: 7.0.12

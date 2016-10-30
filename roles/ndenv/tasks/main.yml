@@ -1,0 +1,36 @@
+---
+- stat: path={{ target }}
+  register: ndenv
+
+- stat: path={{ target }}/plugins/node-build
+  register: node_build
+
+- name: set ignore ssl
+  shell: git config --global http.sslVerify false
+
+- name: clone ndenv
+  git:
+    repo: https://github.com/riywo/ndenv.git
+    dest: "{{ target }}"
+  when: not ndenv.stat.exists
+
+- name: clone node-build
+  git:
+    repo: https://github.com/riywo/node-build.git
+    dest: "{{ target }}/plugins/node-build"
+  when: not node_build.stat.exists
+
+- name: add ndenv.sh
+  copy: src=files/ndenv.sh dest=/etc/profile.d/ndenv.sh
+
+- name: install node.js
+  shell: . /etc/profile ; ndenv install -s {{ node_ver }}
+
+- name: change permission
+  file:
+    path: "{{ target }}"
+    state: directory
+    owner: "{{ ansible_env.SUDO_USER }}"
+    group: "{{ ansible_env.SUDO_USER }}"
+    recurse: yes
+    

@@ -1,0 +1,8 @@
+---
+# vars file for emacs
+emacs_ver: 24.5
+src: /usr/src
+cask_dirname: .cask
+emacs_path: /usr/local/bin/emacs
+dot_emacs_dirname: .emacs.d
+

@@ -1,0 +1,15 @@
+---
+# tasks file for common-ubuntu
+
+- name: install aptitude
+  apt: name="aptitude" state=latest
+
+- name: locale settings
+  shell: echo 'en_US.UTF-8' > /etc/locale.gen ; echo 'ja_JP.UTF-8' >> /etc/locale.gen ; /usr/sbin/locale-gen
+
+- name: localtime setting
+  command: cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+- name: install packages
+  apt: name={{ item }} state=present
+  with_items: install_packages

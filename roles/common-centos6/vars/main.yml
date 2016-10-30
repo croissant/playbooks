@@ -1,0 +1,15 @@
+---
+# vars file for common-centos6
+install_packages:
+  - gcc
+  - gcc-c++
+  - make
+  - perl-ExtUtils-MakeMaker
+  - readline-devel
+  - tar
+  - xz
+  - curl-devel
+  - expat-devel
+  - gettext-devel
+  - openssl-devel
+  - zlib-devel

@@ -1,0 +1,9 @@
+---
+# vars file for che
+maven_ver: 3.3.9
+maven_path: /usr/local/apache-maven-{{ maven_ver }}
+maven_url: http://ftp.jaist.ac.jp/pub/apache/maven/maven-3/{{ maven_ver }}/binaries/apache-maven-{{ maven_ver }}-bin.tar.gz
+maven_checksum: "md5:516923b3955b6035ba6b0a5b031fbd8b"
+
+che_path: /usr/local/eclipse-che
+che_repo: https://github.com/eclipse/che.git

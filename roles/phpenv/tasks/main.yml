@@ -1,0 +1,51 @@
+---
+- stat: path={{ target }}
+  register: phpenv
+
+- name: set ignore ssl
+  shell: git config --global http.sslVerify false
+
+- name: clone phpenv
+  git:
+    repo: https://github.com/CHH/phpenv.git
+    dest: /tmp/phpenv
+  when: not phpenv.stat.exists
+
+- name: install phpenv
+  command: /tmp/phpenv/bin/phpenv-install.sh
+  when: not phpenv.stat.exists
+
+- name: move directory
+  shell: mv ~/.phpenv {{ target }}
+  when: not phpenv.stat.exists
+
+- stat: path={{ target }}/plugins/php-build
+  register: php_build
+
+- name: clone php-build
+  git:
+    repo=https://github.com/CHH/php-build.git
+    dest={{ target }}/plugins/php-build
+  when: not php_build.stat.exists
+
+- name: add phpenv.sh
+  copy: src=files/phpenv.sh dest=/etc/profile.d/phpenv.sh
+
+- name: configure option
+  copy:
+    src: files/default_configure_options
+    dest: "{{ target }}/plugins/php-build/share/php-build/default_configure_options"
+
+- name: install php
+  shell: . /etc/profile ; phpenv install {{ php_ver }}
+
+- name: set php version
+  shell: . /etc/profile ; phpenv global {{ php_ver }}
+
+- name: change permission
+  file:
+    path: "{{ target }}"
+    state: directory
+    owner: "{{ ansible_env.SUDO_USER }}"
+    group: "{{ ansible_env.SUDO_USER }}"
+    recurse: yes

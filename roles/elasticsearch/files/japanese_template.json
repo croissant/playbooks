@@ -1,0 +1,150 @@
+{
+    "japanese_template": {
+        "template": "*ja",
+        "settings": {
+            "analysis": {
+                "filter": {
+                    "romaji": {
+                        "type": "kuromoji_readingform",
+                        "use_romaji": true
+                    }
+                },
+                "tokenizer": {
+                    "ja_tokenizer": {
+                        "type": "kuromoji_tokenizer",
+                        "mode": "search"
+                    },
+                    "ngram_tokenizer": {
+                        "type": "nGram",
+                        "min_gram": 2,
+                        "max_gram": 3,
+                        "token_chars": ["letter", "digit"]
+                    }
+                },
+                "analyzer": {
+                    "facet_analyzer": {
+                        "type": "custom",
+                        "char_filter": ["html_strip"],
+                        "tokenizer": "keyword",
+                        "filter": ["cjk_width", "lowercase"]
+                    },
+                    "ja_analyzer": {
+                        "type": "custom",
+                        "char_filter": [
+                            "html_strip",
+                            "kuromoji_iteration_mark"
+                        ],
+                        "tokenizer": "ja_tokenizer",
+                        "filter": [
+                            "cjk_width",
+                            "lowercase",
+                            "kuromoji_stemmer",
+                            "kuromoji_part_of_speech"
+                        ]
+                    },
+                    "ngram_analyzer": {
+                        "type": "custom",
+                        "char_filter": ["html_strip"],
+                        "tokenizer": "ngram_tokenizer",
+                        "filter": ["cjk_width", "lowercase"]
+                    },
+                    "yomi_analyzer": {
+                        "type": "custom",
+                        "char_filter": [
+                            "html_strip",
+                            "kuromoji_iteration_mark"
+                        ],
+                        "tokenizer": "ja_tokenizer",
+                        "filter": [
+                            "cjk_width",
+                            "lowercase",
+                            "kuromoji_stemmer",
+                            "kuromoji_part_of_speech",
+                            "romaji"
+                        ]
+                    }
+                }
+            }
+        },
+        "mappings": {
+            "_default_": {
+                "_all": {
+                    "analyzer": "ja_analyzer"
+                },
+                "dynamic_templates": [
+                    {
+                        "special_string_fields": {
+                            "match": ".*title.*|.*name.*",
+                            "match_pattern": "regex",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "string",
+                                "fields": {
+                                    "raw": {
+                                        "type": "string",
+                                        "index": "not_analyzed"
+                                    },
+                                    "facet": {
+                                        "type": "string",
+                                        "analyzer": "facet_analyzer"
+                                    },
+                                    "ja": {
+                                        "type": "string",
+                                        "analyzer": "ja_analyzer"
+                                    },
+                                    "ngram": {
+                                        "type": "string",
+                                        "analyzer": "ngram_analyzer"
+                                    },
+                                    "yomi": {
+                                        "type": "string",
+                                        "analyzer": "yomi_analyzer"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "long_string_fields": {
+                            "match": ".*message.*|.*content.*|.*description.*|.*text.*",
+                            "match_pattern": "regex",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "string",
+                                "fields": {
+                                    "ja": {
+                                        "type": "string",
+                                        "analyzer": "ja_analyzer"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "short_string_fields": {
+                            "match": "*",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "string",
+                                "fields": {
+                                    "raw": {
+                                        "type": "string",
+                                        "index": "not_analyzed"
+                                    },
+                                    "facet": {
+                                        "type": "string",
+                                        "analyzer": "facet_analyzer"
+                                    },
+                                    "ja": {
+                                        "type": "string",
+                                        "analyzer": "ja_analyzer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+---
+# vars file for elasticsearch
+elasticsearch_version: 5.0.0-rc1
+elasticsearch_target: /opt
+elasticsearch_data_dir: /share/elasticsearch
+plugins:
+  "analysis-kuromoji": "analysis-kuromoji"
+  "analysis-icu": "analysis-icu"
+
+cluster_name: "prtimes_experiment"
+
+elasticsearch_hosts:
+  elastic04: 172.17.10.34
+  elastic05: 172.17.10.35
+  elastic06: 172.17.10.36

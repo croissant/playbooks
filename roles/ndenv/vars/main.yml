@@ -1,0 +1,5 @@
+---
+# vars file for pyenv
+target: /usr/local/ndenv
+ndenv_path: /usr/local/ndenv/bin/ndenv
+node_ver: v6.9.1

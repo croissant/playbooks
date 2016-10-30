@@ -1,0 +1,5 @@
+---
+# vars file for rbenv
+target: /usr/local/rbenv
+rbenv_path: /usr/local/rbenv/bin/rbenv
+ruby_ver: 2.3.1

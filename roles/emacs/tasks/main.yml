@@ -1,0 +1,75 @@
+---
+# tasks file for emacs
+- include: directory.yml
+
+- stat: path={{ emacs_path }}
+  register: emacs
+
+- stat: path={{ ansible_home.stdout }}/{{ cask_dirname }}
+  register: cask
+
+- stat: path={{ ansible_home.stdout }}/{{ dot_emacs_dirname }}
+  register: dot_emacs_d
+
+- name: get emacs src
+  get_url: url=http://ftp.jaist.ac.jp/pub/GNU/emacs/emacs-{{ emacs_ver }}.tar.xz dest={{ src }}
+  when: not emacs.stat.exists
+  
+- name: extract emacs src
+  command: tar xJf emacs-{{ emacs_ver }}.tar.xz chdir={{ src }} creates={{ src }}/{{ emacs_ver }}
+  when: not emacs.stat.exists
+
+- name: configure emacs
+  command: >
+    ./configure
+    --without-toolkit-scroll-bars
+    --without-xaw3d
+    --without-sound
+    --without-pop
+    --without-xpm
+    --without-tiff
+    --without-rsvg
+    --without-gconf
+    --without-gsettings
+    --without-selinux
+    --without-gpm
+    --without-makeinfo
+    --without-imagemagick
+    --without-x
+    chdir={{ src }}/emacs-{{ emacs_ver }}
+  when: not emacs.stat.exists
+
+- name: make emacs
+  command: make chdir={{ src }}/emacs-{{ emacs_ver }}
+  when: not emacs.stat.exists
+
+- name: make install emacs
+  command: make install chdir={{ src }}/emacs-{{ emacs_ver }}
+  when: not emacs.stat.exists
+
+- name: install cask
+  command: git clone https://github.com/cask/cask.git {{ ansible_home.stdout }}/{{ cask_dirname }}
+  become: no
+  when: not cask.stat.exists
+
+- name: add env
+  shell: echo 'export PATH="$HOME/.cask/bin:$PATH"' >> ~/.bashrc
+  become: no
+  when: not cask.stat.exists
+
+- name: create .emacs.d
+  command: mkdir {{ ansible_home.stdout }}/{{ dot_emacs_dirname }}
+  become: no
+  when: not dot_emacs_d.stat.exists
+
+- name: copy init.el
+  copy: src=init.el dest={{ ansible_home.stdout }}/{{ dot_emacs_dirname }}/init.el
+  become: no
+
+- name: copy Cask file
+  copy: src=Cask dest={{ ansible_home.stdout }}/{{ dot_emacs_dirname }}/Cask
+  become: no
+
+- name: execute cask
+  shell: "{{ ansible_home.stdout }}/{{ cask_dirname }}/bin/cask chdir={{ ansible_home.stdout }}/{{ dot_emacs_dirname }}"
+  become: no

@@ -1,0 +1,5 @@
+---
+# vars file for activator
+activator_path: /usr/local/activator
+activator_version: 1.3.10
+activator_profile: /etc/profile.d/activator.sh

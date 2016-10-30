@@ -1,0 +1,112 @@
+---
+# tasks file for elasticsearch
+- shell: grep 'Debian' /etc/issue | wc -l
+  register: is_debian
+
+- stat: path={{ elasticsearch_target }}
+  register: target_dir
+  
+- stat: path={{ elasticsearch_target }}/elasticsearch-{{ elasticsearch_version }}
+  register: elasticsearch
+
+- stat: path=/usr/local/src/elasticsearch-{{ elasticsearch_version }}.tar.gz
+  register: elasticsearch_archive
+  
+- stat: path={{ elasticsearch_target }}/elasticsearch
+  register: symlink
+
+- stat: path={{ elasticsearch_target }}/elasticsearch/config/templates
+  register: template_dir
+
+- name: set supervisor dir (Debian)
+  stat: path=/etc/supervisor/conf.d/elasticsearch.conf
+  register: supervisor_conf_deb
+  when: ansible_os_family == "Debian"
+
+- name: set supervisor dir (RedHat)
+  stat: path=/etc/supervisord.d/elasticsearch.ini
+  register: supervisor_conf_redhat
+  when: ansible_os_family == "RedHat"
+
+- shell: cat /etc/passwd | cut -d':' -f 1 | grep elasticsearch | wc -l
+  register: elasticsearch_user
+
+- stat: path=/usr/bin/java
+  register: java_exists
+      
+- name: install packages
+  apt: name=openjdk-8-jdk update_cache=yes
+  when: (ansible_os_family == "Debian") and (not java_exists.stat.exists)
+
+- name: install packages
+  shell: yum check-update ; yum -y install java-1.8.0-openjdk
+  when: (ansible_os_family == "RedHat") and (not java_exists.stat.exists)
+
+- name: create target directory
+  file: path={{ elasticsearch_target }} state=directory
+  when: not target_dir.stat.exists
+
+- name: download elasticsearch
+  get_url:
+    url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}.tar.gz
+    dest=/usr/local/src
+  when: not elasticsearch_archive.stat.exists
+
+- name: extract elasticsearch
+  unarchive:
+    src=/usr/local/src/elasticsearch-{{ elasticsearch_version }}.tar.gz
+    dest={{ elasticsearch_target }}
+    copy=no
+  when: not elasticsearch.stat.exists
+
+- name: create symlink
+  file:
+    src={{ elasticsearch_target }}/elasticsearch-{{ elasticsearch_version }}
+    dest={{ elasticsearch_target }}/elasticsearch
+    state=link
+  when: not symlink.stat.exists
+
+- name: create template dir
+  file:
+    path={{ elasticsearch_target}}/elasticsearch/config/templates
+    state=directory
+  when: not template_dir.stat.exists
+
+- name: copy template
+  copy: src=japanese_template.json dest={{ elasticsearch_target }}/elasticsearch/config/templates
+
+- name: install plugins
+  shell: |
+    test -d plugins/{{ item.key }} || bin/elasticsearch-plugin install {{ item.value }} chdir={{ elasticsearch_target }}/elasticsearch
+  with_dict: plugins
+
+- name: copy supervisor config
+  copy: src=elasticsearch.conf dest=/etc/supervisor/conf.d
+  when: (ansible_os_family == "Debian") and (not supervisor_conf_deb.stat.exists)
+
+- name: copy supervisor config
+  copy: src=elasticsearch.conf dest=/etc/supervisord.d/elasticsearch.ini
+  when: (ansible_os_family == "RedHat") and (not supervisor_conf_redhat.stat.exists)
+
+- name: create user
+  shell: useradd -s /bin/false elasticsearch
+  when: elasticsearch_user.stdout == "0"
+
+- name: change permission
+  file:
+    path={{ elasticsearch_target }}/elasticsearch-{{ elasticsearch_version }}
+    owner=elasticsearch
+    group=elasticsearch
+    recurse=yes
+
+- name: create data directories
+  shell: |
+    test -d {{ elasticsearch_data_dir }}/{{ inventory_hostname }}/data ||
+    mkdir -p {{ elasticsearch_data_dir }}/{{ inventory_hostname }}/data
+    test -d {{ elasticsearch_data_dir }}/{{ inventory_hostname }}/logs ||
+    mkdir -p {{ elasticsearch_data_dir }}/{{ inventory_hostname }}/logs
+    chown -R elasticsearch:elasticsearch {{ elasticsearch_data_dir }}
+
+- name: overwrite config file
+  template: src=elasticsearch.yml dest={{ elasticsearch_target }}/elasticsearch/config/elasticsearch.yml
+

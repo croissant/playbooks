@@ -1,0 +1,41 @@
+---
+# vars file for common-ubuntu
+install_packages:
+  - autoconf
+  - automake
+  - gcc
+  - g++
+  - make
+  - gettext
+  - vim
+  - xzip
+  - byobu
+  - tar
+  - tcl
+  - locales
+  - ca-certificates
+  - build-essential
+  - bison
+  - curl
+  - re2c
+  - sqlite3
+  - wget
+  - libgettextpo-dev
+  - libreadline6-dev
+  - zlib1g-dev
+  - libssl-dev
+  - libyaml-dev
+  - libsqlite3-dev
+  - libxml2-dev
+  - libxslt1-dev
+  - libncurses5-dev
+  - libmysqlclient-dev
+  - libpq-dev
+  - libmcrypt-dev
+  - libtidy-dev
+  - libcurl4-openssl-dev
+  - libpng12-dev
+  - libjpeg-dev
+  - libxml2-dev
+  - libxslt-dev
+  - pkg-config
