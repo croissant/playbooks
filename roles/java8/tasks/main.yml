@@ -1,0 +1,15 @@
+---
+# tasks file for java8
+
+- name: add sources.list for java8
+  copy: src=java-debian.list dest=/etc/apt/sources.list.d/java-debian.list
+
+- name: apt-key
+  command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
+
+- name: install java8
+  shell: |
+    echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    aptitude update
+    aptitude -y install oracle-java8-installer
+
