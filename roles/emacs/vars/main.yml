@@ -1,6 +1,6 @@
 ---
 # vars file for emacs
-emacs_ver: 24.5
+emacs_ver: 25.1
 src: /usr/src
 cask_dirname: .cask
 emacs_path: /usr/local/bin/emacs
